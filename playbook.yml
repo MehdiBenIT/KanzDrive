@@ -6,7 +6,6 @@
     - dir_nextcloud: /var/www/nextcloud
     - db_type: mysql
     - db_name: nextcloud
-    - 
   roles:
     - docker_deploy
 
@@ -16,16 +15,24 @@
         path: "{{ dir_nextcloud }}"
         state: directory
 
+    - name: Change folder's permissions
+      file:
+        path: "/var/www/html/occ"
+        owner: www-data
+        group: www-data
+        mode: '0744'
+        
     - name: Configure the nextcloud fresh install
       shell: >
-    php /var/www/html/occ maintenance:install
-    --data-dir "{{ dir_nextcloud }}/files/"
-    --database "{{ db_type }}"
-    --database-name "{{ db_name }}"
-    --database-user "{{ mysql_user }}"
-    --database-pass "{{ mysql_pwd }}"
-    --admin-user "{{ nc_admin }}"
-    --admin-pass "{{ nc_passwd }}"
-    --admin-email "{{ mail_addr }}"
-  args:
-      creates: /var/www/nextcloud/config/config.php
+        php occ maintenance:install
+        --data-dir "{{ dir_nextcloud }}/files/"
+        --database "{{ db_type }}"
+        --database-name "{{ db_name }}"
+        --database-user "{{ mysql_user }}"
+        --database-pass "{{ mysql_pwd }}"
+        --admin-user "{{ nc_admin }}"
+        --admin-pass "{{ nc_passwd }}"
+        --admin-email "{{ mail_addr }}"
+      args:
+          chdir: /var/www/html
+          creates: /var/www/nextcloud/config/config.php
