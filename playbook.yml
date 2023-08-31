@@ -1,5 +1,5 @@
 - name: Installation and configuration of a nextcloud instance
-  hosts: localhost
+  hosts: test
   vars_files:
     - secret.yml
   vars:
@@ -17,22 +17,49 @@
 
     - name: Change folder's permissions
       file:
-        path: "/var/www/html/occ"
+        path: /var/www/html/
         owner: www-data
         group: www-data
         mode: '0744'
-        
-    - name: Configure the nextcloud fresh install
+        recurse: yes
+
+    # - name: Debug php occ 
+    #   shell: /var/www/html/occ
+    #   register: try_occ
+
+    # - name: debug it
+    #   debug:
+    #     msg: "{{ try_occ }}"
+
+          
+    - name: Complete nextcloud's installation
+      become_user: www-data
+      become: yes
       shell: >
-        php occ maintenance:install
-        --data-dir "{{ dir_nextcloud }}/files/"
-        --database "{{ db_type }}"
-        --database-name "{{ db_name }}"
-        --database-user "{{ mysql_user }}"
-        --database-pass "{{ mysql_pwd }}"
-        --admin-user "{{ nc_admin }}"
-        --admin-pass "{{ nc_passwd }}"
-        --admin-email "{{ mail_addr }}"
+        php /var/www/html/occ maintenance:install
       args:
-          chdir: /var/www/html
           creates: /var/www/nextcloud/config/config.php
+      register: setup_nc
+      notify: Restart apache
+
+    - name: display variable
+      debug:
+        var: setup_nc
+        verbosity: 2
+
+    - name: upgrade nextcloud installation
+      shell: sudo -u www-data php /var/www/nextcloud/occ upgrade
+
+    # - name: Configure the nextcloud fresh install
+    #   shell: >
+    #     php /var/www/html/occ maintenance:install
+    #     --data-dir "{{ dir_nextcloud }}/files/"
+    #     --database "{{ db_type }}"
+    #     --database-name "{{ db_name }}"
+    #     --database-user "{{ mysql_user }}"
+    #     --database-pass "{{ mysql_pwd }}"
+    #     --admin-user "{{ nc_admin }}"
+    #     --admin-pass "{{ nc_passwd }}"
+    #     --admin-email "{{ mail_addr }}"
+    #   args:
+    #       creates: /var/www/nextcloud/config/config.php
