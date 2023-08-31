@@ -1,0 +1,35 @@
+version: "3.1"
+
+volumes:
+  db:
+  app:
+
+services:
+  db:
+    image: mariadb
+    container_name: db_nc
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD={{mysql_root_pwd}}
+      - MYSQL_PASSWORD={{mysql_pwd}}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+    
+  app:
+    image: nextcloud
+    restart: always
+    container_name: app_nc
+    ports:
+      - 8088:80
+    depends_on:
+      - db
+    volumes:
+      - app:/var/www/html
+    environment:
+      - MYSQL_ROOT_PASSWORD={{mysql_root_pwd}}
+      - MYSQL_PASSWORD={{mysql_pwd}}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud

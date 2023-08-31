@@ -1,0 +1,10 @@
+- name: Installation and configuration of a nextcloud instance
+  hosts: localhost
+  vars_files:
+    - secret.yml
+  roles:
+    - docker_deploy
+
+  tasks:
+    - name: Configure the nextcloud fresh install
+      shell: 
