@@ -42,26 +42,26 @@
 - name: create a database for nextcloud
   mysql_db:
     name: "{{ db_name }}"
-    login_user: "{{ db_user }}"
+    login_user: "root"
     login_password: "{{ mysql_root_passwd }}"
     login_host: "localhost"
     state: present
 
 - name: create a mysql user for nextcloud
   mysql_user:
-    name: "{{ mysql_user }}"
+    name: "ncuser"
     login_user: "root"
     login_password: "{{ mysql_root_passwd }}"
     login_host: "localhost"
-    password: "{{ mysql_nextcloud_passwd }}"
+    password: "tnyvch10"
     priv: 'nextcloud.*:ALL,GRANT'
     state: present
   notify: Restart mysql
 
-- name: generate admin passwd if nextcloud_passwd is empty
-  set_fact:
-    nc_passwd: "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=32') }}"
-  when: nc_passwd == ''
+# - name: generate admin passwd if nextcloud_passwd is empty
+#   set_fact:
+#     nc_passwd: "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=32') }}"
+#   when: nc_passwd == ''
 
 - name: Restart Apache2 service
   service:
@@ -76,11 +76,11 @@
     --data-dir "{{ dir_nextcloud }}/files/"
     --database "{{ db_type }}"
     --database-name "{{ db_name }}"
-    --database-user "{{ mysql_user }}"
-    --database-pass "{{ mysql_nextcloud_passwd }}"
-    --admin-user "{{ nc_admin }}"
-    --admin-pass "{{ nc_passwd }}"
-    --admin-email "{{ mail_addr }}"
+    --database-user "ncuser"
+    --database-pass "tnyvch10"
+    --admin-user "nc_admin"
+    --admin-pass "tnyvch10"
+    --admin-email "med@gmail.com"
   args:
       creates: /var/www/nextcloud/config/config.php
   register: setup_nc
@@ -99,11 +99,15 @@
   loop: "{{ nc_config }}"
 
 - name: upgrade nextcloud installation
-  shell: sudo -u www-data php /var/www/nextcloud/occ upgrade
+  become_user: www-data
+  become: yes
+  shell: php /var/www/nextcloud/occ upgrade
   
 - name: Disable some applications
+  become_user: www-data
+  become: yes
   command: >
-    docker exec -u www-data app_nc php /var/www/html app:disable {{ item }}
+    php /var/www/nextcloud app:disable {{ item }}
   with_items:
     - dashboard
     - circles
@@ -116,8 +120,10 @@
     - contactsinteraction
 
 - name: Customization of the nextcloud instance
+  become_user: www-data
+  become: yes
   command: >
-    docker exec -u www-data app_nc php /var/www/html theming:config {{ item }}
+    php /var/www/nextcloud theming:config {{ item }}
   with_items:
     - { key: 'color', value: "#808000"}
     - { key: 'name', value: "KanzDrive"}

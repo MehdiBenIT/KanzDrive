@@ -22,4 +22,4 @@
         msg:
           - "This nexcloud instance is ready and available at http://{{ url_nextcloud }}"  
           - "And the IP of the server is: {{ ip }}"
-          - "You can login with credentials: {{ nc_admin }} and password: {{ nc_passwd }}"
+          - "You can login with credentials: nc_admin and password: tnyvch10"
