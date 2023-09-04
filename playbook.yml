@@ -1,11 +1,19 @@
 - name: Installation and configuration of a nextcloud instance
-  hosts: test
+  hosts: testvm
   vars_files:
-    - secret.yml
+     - secret.yml
   vars:
     - dir_nextcloud: /var/www/nextcloud
     - db_type: mysql
     - db_name: nextcloud
+
+  pre_tasks:
+    - name: Install docker compose
+      apt:
+        name: docker-compose
+        state: present
+
+
   roles:
     - docker_deploy
 
@@ -31,24 +39,41 @@
     #   debug:
     #     msg: "{{ try_occ }}"
 
-          
     - name: Complete nextcloud's installation
-      become_user: www-data
-      become: yes
+      template:
+        src: nc_install.sh.j2
+        dest: /tmp/nc_install.sh
+
+    - name: change file permissions
+      file:
+        path: /tmp/nc_install.sh
+        owner: root
+        group: root
+        mode: '0744'
+
+    - name: launch nextcloud script
       shell: >
-        php /var/www/html/occ maintenance:install
+        ./nc_install.sh
       args:
-          creates: /var/www/nextcloud/config/config.php
-      register: setup_nc
-      notify: Restart apache
+        chdir: /tmp/
+          
+          
+    # - name: Complete nextcloud's installation
+    #   become_flags: 
+    #   shell: >
+    #     php /var/www/html/occ maintenance:install
+    #   args:
+    #       creates: /var/www/nextcloud/config/config.php
+    #   register: setup_nc
+    #   notify: Restart apache
 
-    - name: display variable
-      debug:
-        var: setup_nc
-        verbosity: 2
+    # - name: display variable
+    #   debug:
+    #     var: setup_nc
+    #     verbosity: 2
 
-    - name: upgrade nextcloud installation
-      shell: sudo -u www-data php /var/www/nextcloud/occ upgrade
+    # - name: upgrade nextcloud installation
+    #   shell: sudo -u www-data php /var/www/nextcloud/occ upgrade
 
     # - name: Configure the nextcloud fresh install
     #   shell: >
