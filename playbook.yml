@@ -6,13 +6,20 @@
     - dir_nextcloud: /var/www/nextcloud
     - db_type: mysql
     - db_name: nextcloud
+    - nc_admin: nc_adm
+    - mail_addr: mehdibennouar@protonmail.com
+    - nc_config:
+        - { key: 'trusted_domains', value: '*'}
 
   pre_tasks:
-    - name: Install docker compose
+    - name: Install docker compose and sudo
       apt:
-        name: docker-compose
+        name: "{{ item }}"
         state: present
-
+      with_items: 
+        - docker-compose
+        - sudo
+        - php
 
   roles:
     - docker_deploy
@@ -58,14 +65,33 @@
         chdir: /tmp/
           
           
-    # - name: Complete nextcloud's installation
-    #   become_flags: 
-    #   shell: >
-    #     php /var/www/html/occ maintenance:install
-    #   args:
-    #       creates: /var/www/nextcloud/config/config.php
-    #   register: setup_nc
-    #   notify: Restart apache
+    - name: Complete nextcloud's installation
+      shell: >
+        sudo -u www-data php /var/www/html maintenance:install \
+        --data-dir "{{ dir_nextcloud }}/files/" \
+        --database "{{ db_type }}" \
+        --database-name "{{ db_name }}" \
+        --database-user "{{ mysql_user }}" \
+        --database-pass "{{ mysql_pwd }}" \
+        --admin-user "{{ nc_admin }}" \
+        --admin-pass "{{ nc_passwd }}" \
+        --admin-email "{{ mail_addr }}" \
+        /
+      args:
+          creates: /var/www/nextcloud/config/config.php
+      register: setup_nc
+      notify: Restart Apache
+
+    - name: Add trusted domains
+      shell: >
+        sudo -u www-data php /var/www/html config:system:set trusted_domains 2 --value="{{ item.value }}"
+      loop: "{{nc_config}}"
+
+  handlers:
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
 
     # - name: display variable
     #   debug:
