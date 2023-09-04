@@ -1,0 +1,25 @@
+---
+- name: Install and configure nextcloud server
+  hosts: vm
+  vars:
+    ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+    mysql_root_passwd: tnyvch10
+    mysql_passwd: tnyvch10
+    db_user: tnyvch10
+  vars_prompt:
+    - name: url_nextcloud
+      prompt: "domain of nextcloud instance"
+      private: no
+
+  roles:
+    - os_prepare
+    - lamp_setup
+    - nextcloud_setup
+
+  post_tasks:
+    - name: installation finished
+      debug:
+        msg:
+          - "This nexcloud instance is ready and available at http://{{ url_nextcloud }}"  
+          - "And the IP of the server is: {{ ip }}"
+          - "You can login with credentials: {{ nc_admin }} and password: {{ nc_passwd }}"

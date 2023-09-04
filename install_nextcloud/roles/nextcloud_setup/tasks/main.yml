@@ -1,0 +1,125 @@
+---
+
+- name: download nextcloud files
+  get_url:
+    url: "https://download.nextcloud.com/server/releases/latest.zip"
+    dest: "/tmp/nextcloud_latest.zip"
+
+- name: create directory for nextcloud  
+  file:
+    path: "{{ dir_nextcloud }}"
+    state: directory
+    recurse: yes
+    owner: www-data
+    group: www-data
+    mode: 0644  
+
+- name: install nextcloud
+  unarchive:
+    src: "/tmp/nextcloud_latest.zip"
+    dest: "/var/www"
+    remote_src: true
+    creates: "/var/www/nextcloud/occ"
+
+- name: change repository's owner"
+  file:
+    path: "{{ dir_nextcloud }}"
+    state: directory
+    recurse: yes
+    owner: www-data
+    group: www-data
+    mode: 0775
+
+- name: create apache configuration file
+  template:
+    src: nextcloud.conf.j2
+    dest: /etc/apache2/sites-available/nextcloud.conf
+
+- name: activate apache nextcloud configuration
+  shell: /usr/sbin/a2ensite nextcloud
+  notify: Restart apache
+
+- name: create a database for nextcloud
+  mysql_db:
+    name: "{{ db_name }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ mysql_root_passwd }}"
+    login_host: "localhost"
+    state: present
+
+- name: create a mysql user for nextcloud
+  mysql_user:
+    name: "{{ mysql_user }}"
+    login_user: "root"
+    login_password: "{{ mysql_root_passwd }}"
+    login_host: "localhost"
+    password: "{{ mysql_nextcloud_passwd }}"
+    priv: 'nextcloud.*:ALL,GRANT'
+    state: present
+  notify: Restart mysql
+
+- name: generate admin passwd if nextcloud_passwd is empty
+  set_fact:
+    nc_passwd: "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=32') }}"
+  when: nc_passwd == ''
+
+- name: Restart Apache2 service
+  service:
+    name: apache2
+    state: restarted
+
+- name: Complete nextcloud's installation
+  become_user: www-data
+  become: yes
+  shell: >
+    php /var/www/nextcloud/occ maintenance:install
+    --data-dir "{{ dir_nextcloud }}/files/"
+    --database "{{ db_type }}"
+    --database-name "{{ db_name }}"
+    --database-user "{{ mysql_user }}"
+    --database-pass "{{ mysql_nextcloud_passwd }}"
+    --admin-user "{{ nc_admin }}"
+    --admin-pass "{{ nc_passwd }}"
+    --admin-email "{{ mail_addr }}"
+  args:
+      creates: /var/www/nextcloud/config/config.php
+  register: setup_nc
+  notify: Restart apache
+
+- name: display variable
+  debug:
+    var: setup_nc
+    verbosity: 2
+
+- name: set nextcloud trusted domain
+  become_user: www-data
+  become: yes
+  shell: >
+    php /var/www/nextcloud/occ config:system:set "{{ item.key }}" "{{ item.value }}"
+  loop: "{{ nc_config }}"
+
+- name: upgrade nextcloud installation
+  shell: sudo -u www-data php /var/www/nextcloud/occ upgrade
+  
+- name: Disable some applications
+  command: >
+    docker exec -u www-data app_nc php /var/www/html app:disable {{ item }}
+  with_items:
+    - dashboard
+    - circles
+    - weather_status
+    - activity
+    - photos
+    - recommendations
+    - firstrunwizard
+    - nextcloud_announcements
+    - contactsinteraction
+
+- name: Customization of the nextcloud instance
+  command: >
+    docker exec -u www-data app_nc php /var/www/html theming:config {{ item }}
+  with_items:
+    - { key: 'color', value: "#808000"}
+    - { key: 'name', value: "KanzDrive"}
+    - { key: 'url', value: "https://www.kanzdrive.com"}
+    - { key: 'slogan', value: "Your own secure and fast cloud storage service."}

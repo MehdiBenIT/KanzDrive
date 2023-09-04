@@ -1,0 +1,11 @@
+---
+
+- name: update system
+  apt:
+    update_cache: yes
+    upgrade: full
+
+- name: install specific packages
+  apt:
+    name: "{{ packages }}"
+    state: latest

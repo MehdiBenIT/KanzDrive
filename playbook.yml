@@ -15,7 +15,7 @@
     - name: Update packages
       apt:
         update_cache: yes
-        upgrade: full
+        upgrade: 'yes'
         
     - name: Install docker compose and sudo
       apt:
@@ -44,7 +44,7 @@
         recurse: yes
 
     # - name: Debug php occ 
-    #   shell: /var/www/html/occ
+    #   command: /var/www/html/occ
     #   register: try_occ
 
     # - name: debug it
@@ -63,16 +63,16 @@
         group: root
         mode: '0744'
 
-    - name: launch nextcloud script
-      shell: >
-        ./nc_install.sh
-      args:
-        chdir: /tmp/
+    # - name: launch nextcloud script
+    #   command: >
+    #     ./nc_install.sh
+    #   args:
+    #     chdir: /tmp/
           
           
     - name: Complete nextcloud's installation
-      shell: >
-        sudo -u www-data php /var/www/html maintenance:install \
+      command: >
+        docker exec -u www-data app_nc php /var/www/html maintenance:install \
         --data-dir "{{ dir_nextcloud }}/files/" \
         --database "{{ db_type }}" \
         --database-name "{{ db_name }}" \
@@ -88,34 +88,35 @@
       notify: Restart Apache
 
     - name: Add trusted domains
-      shell: >
-        sudo -u www-data php /var/www/html config:system:set trusted_domains 2 --value="{{ item.value }}"
+      command: >
+        docker exec -u www-data app_nc php /var/www/html config:system:set trusted_domains 2 --value="{{ item.value }}"
       loop: "{{nc_config}}"
+
+    - name: Disable some applications
+      command: >
+        docker exec -u www-data app_nc php /var/www/html app:disable {{ item }}
+      with_items:
+      - dashboard
+        - circles
+        - weather_status
+        - activity
+        - photos
+        - recommendations
+        - firstrunwizard
+        - nextcloud_announcements
+        - contactsinteraction
+
+    - name: Customization of the nextcloud instance
+      command: >
+        docker exec -u www-data app_nc php /var/www/html theming:config {{ item }}
+      with_items:
+        - { key: 'color', value: "#808000"}
+        - { key: 'name', value: "KanzDrive"}
+        - { key: 'url', value: "https://www.kanzdrive.com"}
+        - { key: 'slogan', value: "Your own secure and fast cloud storage service."}
 
   handlers:
     - name: Restart Apache
       service:
         name: apache2
         state: restarted
-
-    # - name: display variable
-    #   debug:
-    #     var: setup_nc
-    #     verbosity: 2
-
-    # - name: upgrade nextcloud installation
-    #   shell: sudo -u www-data php /var/www/nextcloud/occ upgrade
-
-    # - name: Configure the nextcloud fresh install
-    #   shell: >
-    #     php /var/www/html/occ maintenance:install
-    #     --data-dir "{{ dir_nextcloud }}/files/"
-    #     --database "{{ db_type }}"
-    #     --database-name "{{ db_name }}"
-    #     --database-user "{{ mysql_user }}"
-    #     --database-pass "{{ mysql_pwd }}"
-    #     --admin-user "{{ nc_admin }}"
-    #     --admin-pass "{{ nc_passwd }}"
-    #     --admin-email "{{ mail_addr }}"
-    #   args:
-    #       creates: /var/www/nextcloud/config/config.php
