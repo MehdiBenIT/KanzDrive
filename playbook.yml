@@ -12,6 +12,11 @@
         - { key: 'trusted_domains', value: '*'}
 
   pre_tasks:
+    - name: Update packages
+      apt:
+        update_cache: yes
+        upgrade: full
+        
     - name: Install docker compose and sudo
       apt:
         name: "{{ item }}"
