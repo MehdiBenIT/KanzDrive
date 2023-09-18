@@ -69,19 +69,23 @@
     #   args:
     #     chdir: /tmp/
           
+    - name: Create file dir
+      file:
+        path: "/home/www-data/files-nc/"
+        state: directory
+        mode: '0755'
           
     - name: Complete nextcloud's installation
       command: >
-        docker exec -u www-data app_nc php /var/www/html maintenance:install \
-        --data-dir "{{ dir_nextcloud }}/files/" \
+        docker exec -u www-data app_nc php occ maintenance:install \
         --database "{{ db_type }}" \
+        --database-host "db_nc"
         --database-name "{{ db_name }}" \
         --database-user "{{ mysql_user }}" \
         --database-pass "{{ mysql_pwd }}" \
         --admin-user "{{ nc_admin }}" \
         --admin-pass "{{ nc_passwd }}" \
-        --admin-email "{{ mail_addr }}" \
-        /
+        --admin-email "{{ mail_addr }}"
       args:
           creates: /var/www/nextcloud/config/config.php
       register: setup_nc
@@ -89,12 +93,12 @@
 
     - name: Add trusted domains
       command: >
-        docker exec -u www-data app_nc php /var/www/html config:system:set trusted_domains 2 --value="{{ item.value }}"
+        docker exec -u www-data app_nc php occ config:system:set trusted_domains 2 --value="{{ item.value }}"
       loop: "{{nc_config}}"
 
     - name: Disable some applications
       command: >
-        docker exec -u www-data app_nc php /var/www/html app:disable {{ item }}
+        docker exec -u www-data app_nc php occ app:disable {{ item }}
       with_items:
       - dashboard
         - circles
@@ -108,7 +112,7 @@
 
     - name: Customization of the nextcloud instance
       command: >
-        docker exec -u www-data app_nc php /var/www/html theming:config {{ item }}
+        docker exec -u www-data app_nc php occ theming:config {{ item }}
       with_items:
         - { key: 'color', value: "#808000"}
         - { key: 'name', value: "KanzDrive"}
