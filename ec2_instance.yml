@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation Template for EC2 instance
+Resources:
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-01103fb68b3569475
+      KeyName: asfar_key
+      region: us-west-2
+      Tags:
+        - Key: nextcloud_install
+          Value: true
