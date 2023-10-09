@@ -5,6 +5,16 @@
     - aws_secret.yml
   gather_facts: false
   tasks:
+    - name: Initialize Terraform
+      command: terraform init
+      args:
+        chdir: /path/to/your/terraform/directory/
+
+    - name: Apply Terraform script
+      command: terraform apply -auto-approve
+      args:
+        chdir: /path/to/your/terraform/directory/
+
     - name: Launch a new EC2 instance
       amazon.aws.ec2_instance:
         aws_access_key: "{{ aws_access_key }}"
