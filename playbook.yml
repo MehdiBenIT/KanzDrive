@@ -74,7 +74,7 @@
         path: "/home/www-data/files-nc/"
         state: directory
         mode: '0755'
-          
+
     - name: Complete nextcloud's installation
       command: >
         docker exec -u www-data app_nc php occ maintenance:install \
@@ -91,6 +91,11 @@
       register: setup_nc
       notify: Restart Apache
 
+    - name: chanque skeleton nc
+      lineinfile:
+        path: /var/www/nextcloud/config/config.php
+        line: "'skeletondirectory' => ''," 
+        create: yes
     - name: Add trusted domains
       command: >
         docker exec -u www-data app_nc php occ config:system:set trusted_domains 2 --value="{{ item.value }}"
@@ -112,7 +117,7 @@
 
     - name: Customization of the nextcloud instance
       command: >
-        docker exec -u www-data app_nc php occ theming:config {{ item }}
+        docker exec -u www-data app_nc php occ theming:config {{ item.key }} "{{ item.value }}"
       with_items:
         - { key: 'color', value: "#808000"}
         - { key: 'name', value: "KanzDrive"}
