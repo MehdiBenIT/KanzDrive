@@ -8,47 +8,57 @@
     - name: Initialize Terraform
       command: terraform init
       args:
-        chdir: /path/to/your/terraform/directory/
+        chdir: ./terraform_scripts/
 
     - name: Apply Terraform script
       command: terraform apply -auto-approve
       args:
-        chdir: /path/to/your/terraform/directory/
+        chdir: ./terraform_scripts/
 
-    - name: Launch a new EC2 instance
-      amazon.aws.ec2_instance:
-        aws_access_key: "{{ aws_access_key }}"
-        aws_secret_key: "{{ aws_secret_key }}"
-        name: "ec2-nc1-test"
-        instance_type: t2.micro
-        image_id: ami-01103fb68b3569475
-        count: 1
-        region: us-east-2
-        network:
-          assign_public_ip: true
-      register: ec2
+    - name: Run Terraform Output for instance_ip
+      command: terraform output -json instance_ip
+      args:
+        chdir: ./terraform_scripts/
+      register: tf_output
+
+    - name: Set Fact for instance_ip
+      set_fact:
+        ec2_nc: "{{ tf_output.stdout | from_json }}"
+
+    # - name: Launch a new EC2 instance
+    #   # amazon.aws.ec2_instance:
+    #     aws_access_key: "{{ aws_access_key }}"
+    #     aws_secret_key: "{{ aws_secret_key }}"
+    #     name: "ec2-nc1-test"
+    #     instance_type: t2.micro
+    #     image_id: ami-01103fb68b3569475
+    #     count: 1
+    #     region: us-east-2
+    #     network:
+    #       assign_public_ip: true
+    #   register: ec2
     
-    - name: debug ec2
-      debug:
-        msg: "{{ ec2.instances }}"
+    # - name: debug ec2
+    #   debug:
+    #     msg: "{{ ec2.instances }}"
 
-    - name: Wait for SSH to come up
-      wait_for:
-        host: "{{ ec2.instances }}"
-        port: 22
-        delay: 60
-        timeout: 320
-        state: started
-      with_items: "{{ ec2.instances }}"
+    # - name: Wait for SSH to come up
+    #   wait_for:
+    #     host: "{{ ec2.instances }}"
+    #     port: 22
+    #     delay: 60
+    #     timeout: 320
+    #     state: started
+    #   with_items: "{{ ec2.instances }}"
 
-    - name: Show public IP
-      debug:
-        var: item.public_ip
-      with_items: "{{ ec2.instances }}"
+    # - name: Show public IP
+    #   debug:
+    #     var: item.public_ip
+    #   with_items: "{{ ec2.instances }}"
 
 
 - name: Installation and configuration of a nextcloud instance
-  hosts: ec2-nc
+  hosts: "{{ instance_ip }}"
   become: true
   vars_files:
      - secret.yml
