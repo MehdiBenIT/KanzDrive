@@ -1,4 +1,4 @@
-Overview
+### Overview
 
 KanzDrive is a cloud storage service designed to offer seamless and secure file storage and sharing capabilities. Built with the needs of students and the general public in mind, this project aims to provide not only basic storage but also innovative features to enhance user experience and data management.
 Features
@@ -12,31 +12,22 @@ Standard
     Data Encryption: Military-grade encryption for your peace of mind.
     Backup and Recovery: Never lose an important file again.
 
-Specialized for Students
+## Specialized for Students
 
     Collaborative Editing: Edit documents in real-time with team members.
     Assignment Submission: Built-in assignment submission folders.
     Note-Taking: An integrated note-taking feature.
     Annotation and Markup: Annotate PDFs and other documents easily.
 
-For the General Public
+## For the General Public
 
     Photo Backup: Your memories, safely stored.
     Media Streaming: Stream your media files directly from the cloud.
     File Preview: Know what’s inside a file without downloading.
     Automated Sorting: Let our AI sort your files for you.
 
-Innovative
+## Innovative
 
     AI-Based Summarization: Get the gist of lengthy documents quickly.
     Voice Commands: Manage your files hands-free.
     Sustainability Metrics: Track your data's carbon footprint.
-
-Installation & Usage
-
-(Put installation and usage details here. A step-by-step guide would be ideal, perhaps with code snippets.)
-Contribution
-
-We welcome contributions from the community! Please read our Contribution Guidelines for more information on how you can contribute to [Your Project Name].
-
-Feel free to customize this template to match the unique aspects of your project. The goal is to communicate what the project is about, why it's useful, and how people can get started with it.
