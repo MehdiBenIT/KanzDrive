@@ -28,6 +28,7 @@ services:
       - db
     volumes:
       - app:/var/www/html
+      - ./config.php:/var/www/html/config/config.php
     environment:
       - MYSQL_ROOT_PASSWORD={{mysql_root_pwd}}
       - MYSQL_PASSWORD={{mysql_pwd}}
