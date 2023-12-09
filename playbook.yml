@@ -71,15 +71,7 @@
   become: true
   vars_files:
      - secret.yml
-  vars:
-    - dir_nextcloud: /var/www/nextcloud
-    - db_type: mysql
-    - db_name: nextcloud
-    - nc_admin: nc_adm
-    - mail_addr: mehdibennouar@protonmail.com
-    - nc_config:
-        - { key: 'trusted_domains', value: '*'}
-
+     
   pre_tasks:
     - name: Update packages
       apt:
