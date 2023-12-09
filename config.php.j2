@@ -27,8 +27,9 @@ $CONFIG = array (
     {% endfor %}
   ),
   'datadirectory' => '/var/www/html/data',
+  'skeletondirectory' => '',
   'dbtype' => 'mysql',
   'version' => '27.0.2.1',
-  'overwrite.cli.url' => 'http://137.184.164.185:8088',
+  'overwrite.cli.url' => '{{ nc_url }}',
   'installed' => true,
 );
