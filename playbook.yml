@@ -152,15 +152,39 @@
       register: setup_nc
       notify: Restart Apache
 
-    - name: chanque skeleton nc
-      lineinfile:
-        path: /var/www/nextcloud/config/config.php
-        line: "'skeletondirectory' => ''," 
-        create: yes
-    - name: Add trusted domains
-      command: >
-        docker exec -u www-data app_nc php occ config:system:set trusted_domains 2 --value="{{ item.value }}"
-      loop: "{{nc_config}}"
+    - name: Generate Nextcloud config file from template
+      template:
+        src: templates/config.php.j2
+        dest: ./config.php
+
+    - name: Generate again the Docker Compose file from Jinja2 template
+      template:
+        src: docker_deploy/templates/docker-compose.yml
+        dest: ./tmp/docker-compose.yml
+
+    - name: Redeploy Nextcloud Docker container
+      community.docker.docker_compose:
+        project_src: ./tmp/docker-compose.yml
+        state: present
+        restarted: yes
+
+    - name: Ensure Docker containers are running
+      docker_container:
+        name: app_nc
+        image: nextcloud
+        volumes:
+          - ".app:/var/www/html"
+          - "./config.php:/var/www/html/config/config.php"
+        
+    # - name: chanque skeleton nc
+    #   lineinfile:
+    #     path: /var/www/nextcloud/config/config.php
+    #     line: "'skeletondirectory' => ''," 
+    #     create: yes
+    # - name: Add trusted domains
+    #   command: >
+    #     docker exec -u www-data app_nc php occ config:system:set trusted_domains 2 --value="{{ item.value }}"
+    #   loop: "{{nc_config}}"
 
     - name: Disable some applications
       command: >
@@ -182,7 +206,7 @@
       with_items:
         - { key: 'color', value: "#808000"}
         - { key: 'name', value: "KanzDrive"}
-        - { key: 'url', value: "https://www.kanzdrive.com"}
+        - { key: 'url', value: "nc_url"}
         - { key: 'slogan', value: "Your own secure and fast cloud storage service."}
 
   handlers:
