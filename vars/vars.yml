@@ -1,1 +1,11 @@
 instance_ip: "test"
+
+dir_nextcloud: /var/www/nextcloud
+db_type: mysql
+db_name: nextcloud
+nc_admin: nc_adm
+mail_addr: mehdibennouar@protonmail.com
+
+nc_config:
+  trusted_domains: 
+    - '*' #Modify that to add dynamically urls to authorize on the nextcloud instance
