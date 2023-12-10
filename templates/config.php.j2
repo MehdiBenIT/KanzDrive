@@ -22,12 +22,14 @@ $CONFIG = array (
   'secret' => 'qXHTrWP0FtZY+gEkZOvk9AjWRk812NeWATiesL+4fh1SN6Ua',
   'trusted_domains' =>
   array (
-    0 => '137.184.164.185:8088',
-    1 => '*',
+    {% for domain in trusted_domains %}
+    {{ loop.index0 }} => '{{ domain }}',
+    {% endfor %}
   ),
   'datadirectory' => '/var/www/html/data',
+  'skeletondirectory' => '',
   'dbtype' => 'mysql',
   'version' => '27.0.2.1',
-  'overwrite.cli.url' => 'http://137.184.164.185:8088',
+  'overwrite.cli.url' => '{{ nc_url }}',
   'installed' => true,
 );

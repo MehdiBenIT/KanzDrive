@@ -1,4 +1,4 @@
-instance_ip: "test"
+instance_ip: "localhost"
 
 dir_nextcloud: /var/www/nextcloud
 db_type: mysql
@@ -6,5 +6,8 @@ db_name: nextcloud
 nc_admin: nc_adm
 mail_addr: mehdibennouar@protonmail.com
 
-trusted_domains: 
-  - 'localhost'
+nc_url: localhost
+
+trusted_domains:
+  - "{{ nc_url }}"
+  - "localhost"
