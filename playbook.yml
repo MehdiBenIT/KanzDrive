@@ -91,51 +91,6 @@
     - docker_deploy
 
   tasks:
-    - name: Create nextcloud directory
-      file:
-        path: "{{ dir_nextcloud }}"
-        state: directory
-
-    - name: Change folder's permissions
-      file:
-        path: /var/www/html/
-        owner: www-data
-        group: www-data
-        mode: '0744'
-        recurse: yes
-
-    # - name: Debug php occ 
-    #   command: /var/www/html/occ
-    #   register: try_occ
-
-    # - name: debug it
-    #   debug:
-    #     msg: "{{ try_occ }}"
-
-    # - name: Complete nextcloud's installation
-    #   template:
-    #     src: /templates/nc_install.sh.j2
-    #     dest: /tmp/nc_install.sh
-
-    # - name: change file permissions
-    #   file:
-    #     path: /tmp/nc_install.sh
-    #     owner: root
-    #     group: root
-    #     mode: '0744'
-
-    # - name: launch nextcloud script
-    #   command: >
-    #     ./nc_install.sh
-    #   args:
-    #     chdir: /tmp/
-          
-    - name: Create file dir
-      file:
-        path: "/home/www-data/files-nc/"
-        state: directory
-        mode: '0755'
-
     # - name: Complete nextcloud's installation
     #   command: >
     #     docker exec -u www-data app_nc php occ maintenance:install \
