@@ -88,7 +88,7 @@
         state: present
 
   roles:
-    - docker_deploy
+    - nextcloud_deploy_docker
 
   tasks:
     # - name: Complete nextcloud's installation
