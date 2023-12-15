@@ -3,3 +3,4 @@ inventory
 *.cfg
 test/*
 secrets/*
+.infracost/*

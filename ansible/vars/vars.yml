@@ -1,4 +1,4 @@
-instance_ip: "localhost"
+instance_ip: "143.198.130.2"
 
 dir_nextcloud: /var/www/nextcloud
 db_type: mysql
