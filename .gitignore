@@ -1,4 +1,5 @@
 inventory
 *.pem
 *.cfg
-
+test/*
+secrets/*
