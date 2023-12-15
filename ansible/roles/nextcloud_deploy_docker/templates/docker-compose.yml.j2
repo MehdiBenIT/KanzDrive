@@ -1,9 +1,5 @@
 version: '3'
 
-volumes:
-  db:
-  app:
-
 services:
   db:
     image: mariadb
@@ -15,25 +11,31 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD={{mysql_root_pwd}}
       - MYSQL_PASSWORD={{mysql_pwd}}
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
+      - MYSQL_DATABASE={{mysql_name}}
+      - MYSQL_USER={{mysql_user}}
 
   app:
     image: nextcloud
     restart: always
     container_name: app_nc
     ports:
-      - 8088:80
-    depends_on:
+      - {{port_app}}:80
+    links:
       - db
     volumes:
-      - app:/var/www/html
+      - nextcloud:/var/www/html
       - ./config.php:/var/www/html/config/config.php
     environment:
-      - MYSQL_ROOT_PASSWORD={{mysql_root_pwd}}
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_HOST=db_nc
+      - MYSQL_DATABASE={{mysql_name}}
+      - MYSQL_HOST={{db_container_name}}
       - MYSQL_USER={{ mysql_user }}
       - MYSQL_PASSWORD={{ mysql_pwd }}
-      - MYSQL_ADMIN_USER={{ nc_admin }}
-      - MYSQL_ADMIN_PASSWORD={{ nc_passwd }}
+      - NEXTCLOUD_ADMIN_USER={{ nc_admin }}
+      - NEXTCLOUD_ADMIN_PASSWORD={{ nc_passwd }}
+      - NEXTCLOUD_DATA_DIR={{dir_nextcloud}}
+      - PHP_MEMORY_LIMIT=755M
+      - PHP_UPLOAD_LIMIT=755M
+
+volumes:
+  db:
+  nextcloud:
