@@ -1,0 +1,35 @@
+<?php
+$CONFIG = array (
+  'htaccess.RewriteBase' => '/',
+  'memcache.local' => '\\OC\\Memcache\\APCu',
+  'apps_paths' => 
+  array (
+    0 => 
+    array (
+      'path' => '/var/www/html/apps',
+      'url' => '/apps',
+      'writable' => false,
+    ),
+    1 => 
+    array (
+      'path' => '/var/www/html/custom_apps',
+      'url' => '/custom_apps',
+      'writable' => true,
+    ),
+  ),
+  'instanceid' => 'oce4hfxik5o2',
+  'passwordsalt' => 'jGIaC69M8LiV5FDWWU8t4iKtkLIGY9',
+  'secret' => 'qXHTrWP0FtZY+gEkZOvk9AjWRk812NeWATiesL+4fh1SN6Ua',
+  'trusted_domains' =>
+  array (
+    {% for domain in trusted_domains %}
+    {{ loop.index0 }} => '{{ domain }}',
+    {% endfor %}
+  ),
+  'datadirectory' => '/var/www/html/data',
+  'skeletondirectory' => '',
+  'dbtype' => 'mysql',
+  'version' => '27.0.2.1',
+  'overwrite.cli.url' => '{{ nc_url }}',
+  'installed' => true,
+);
