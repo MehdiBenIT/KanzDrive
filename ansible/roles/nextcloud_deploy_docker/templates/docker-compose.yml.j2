@@ -3,9 +3,9 @@ version: '3'
 services:
   db:
     image: mariadb
-    container_name: db_nc
+    container_name: {{db_container_name}}
     restart: always
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     volumes:
       - db:/var/lib/mysql
     environment:
@@ -24,7 +24,6 @@ services:
       - db
     volumes:
       - nextcloud:/var/www/html
-      - ./config.php:/var/www/html/config/config.php
     environment:
       - MYSQL_DATABASE={{mysql_name}}
       - MYSQL_HOST={{db_container_name}}
@@ -33,9 +32,11 @@ services:
       - NEXTCLOUD_ADMIN_USER={{ nc_admin }}
       - NEXTCLOUD_ADMIN_PASSWORD={{ nc_passwd }}
       - NEXTCLOUD_DATA_DIR={{dir_nextcloud}}
+      - NEXCLOUD_TRUSTED_DOMAINS=*
       - PHP_MEMORY_LIMIT=755M
       - PHP_UPLOAD_LIMIT=755M
 
 volumes:
   db:
   nextcloud:
+

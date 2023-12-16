@@ -1,10 +1,19 @@
 ---
 - name: launch docker compose install
   template:
-    src: docker-compose.yml.j2
-    dest: /tmp/docker-compose.yml
+    src: docker-compose-2.yml.j2
+    dest: /tmp/docker-compose-2.yml
 
-- name: Launch docker compose file
-  shell: docker-compose up -d
-  args: 
-    chdir: /tmp/
+- block:
+    - name: Launch docker compose file
+      shell: docker-compose -f docker-compose-2.yml up -d
+      args: 
+        chdir: /tmp/
+      register: setup_docker_compose
+    
+  rescue:
+    - name: debug docker compose launch
+      debug:
+        msg: "{{ setup_docker_compose }}"
+
+  
