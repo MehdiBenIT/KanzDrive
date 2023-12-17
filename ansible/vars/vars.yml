@@ -6,6 +6,12 @@ db_name: nextcloud
 nc_admin: nc_adm
 mail_addr: mehdibennouar@protonmail.com
 
+mysql_name: nextcloud
+
+port_app: 8080
+
+db_container_name: db_nc
+
 nc_url: localhost
 
 trusted_domains:
