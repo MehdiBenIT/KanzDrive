@@ -21,6 +21,7 @@
           - docker-compose
           - sudo
           - php
+          - php-bz2
         state: present
   roles:
     - role: ../roles/nextcloud_deploy_docker
