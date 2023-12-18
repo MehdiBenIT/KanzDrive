@@ -22,6 +22,7 @@ services:
       - {{port_app}}:80
     links:
       - db
+      - redis
     volumes:
       - nextcloud:/var/www/html
     environment:
@@ -36,7 +37,16 @@ services:
       - PHP_MEMORY_LIMIT=755M
       - PHP_UPLOAD_LIMIT=755M
 
+  redis:
+    image: redis:alpine
+    container_name: redis
+    command: redis-server --requirepass tnyvch
+    volumes:
+      - redis:/data
+
+
 volumes:
   db:
   nextcloud:
+  redis:
 
