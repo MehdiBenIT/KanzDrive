@@ -1,0 +1,26 @@
+---
+
+- name: Testing the docker compose template file
+  hosts: nc_hosts
+  become: true
+  vars_files:
+    - ../vars/vars.yml
+    - ../../secrets/secret.yml
+    - ../../secrets/secret_key.yml
+  vars:
+    - ansible_ssh_private_key_files: "{{ private_key }}"
+  pre_tasks:
+    - name: Update packages
+      apt:
+        update_cache: yes
+        upgrade: 'yes'
+        
+    - name: Install docker compose and sudo
+      apt:
+        name:
+          - docker-compose
+          - sudo
+          - php
+        state: present
+  roles:
+    - role: ../roles/nextcloud_deploy_docker

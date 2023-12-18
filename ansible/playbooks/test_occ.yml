@@ -1,0 +1,55 @@
+---
+
+- name: Testing occ command loop ansible
+  hosts: nc_hosts
+  become: true
+  vars_files:
+    - ../vars/vars.yml
+    - ../../secrets/secret.yml
+    - ../../secrets/secret_key.yml
+  vars:
+    - ansible_ssh_private_key_files: "{{ private_key }}"
+
+
+  tasks:      
+    - name: Test occ command
+      command: >
+        docker exec -u 33 {{container_name}} php occ {{item}}
+      with_items:
+        - "app:list"
+        - "config:list"
+      register: occ_command
+
+    - name: Disable applications
+      command: >
+        docker exec -u 33 {{container_name}} php occ app:disable {{item}}
+      with_items:
+        - "circles"
+        - "recommendations"
+        - "firstrunwizard"
+        - "nextcloud_announcements"
+        - "contactsinteraction"
+
+    - name: Enable applications
+      command: >
+        docker exec -u 33 {{container_name}} php occ app:enable {{item}}
+      with_items:
+        - "mail"
+        - "tables"
+        - "nextcloud_assistant"
+        - "twofactor_totp"
+        - "twofactor_webauthn"
+        - "systemtags"
+        - "suspicious_login"
+        - "integration_deepl"
+        - "integration_notion"
+        - "calendar"
+
+    - name: modify theming
+      command: >
+        docker exec -u 33 {{container_name}} php occ theming:config {{item.key}} {{item.value}}
+      with_items: "{{ theming_vars }}"
+
+    - name: debug occ
+      debug:
+        msg: "{{ occ_command }}"

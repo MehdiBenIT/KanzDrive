@@ -11,9 +11,12 @@ mysql_name: nextcloud
 port_app: 8080
 
 db_container_name: db_nc
+container_name: app_nc
 
 nc_url: localhost
 
 trusted_domains:
   - "{{ nc_url }}"
   - "localhost"
+
+ip_nc: 143.110.216.239
