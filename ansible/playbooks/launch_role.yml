@@ -23,5 +23,36 @@
           - php
           - php-bz2
         state: present
+  tasks:
+    - name: launch docker compose install
+      template:
+        src: ../templates/docker-compose-rp.yml.j2
+        dest: /tmp/docker-compose-rp.yml
+
+    - block:
+        - name: Launch docker compose file
+          shell: docker-compose -f docker-compose-rp.yml up -d
+          args: 
+            chdir: /tmp/
+          register: setup_docker_compose
+        
+      rescue:
+        - name: debug docker compose launch
+          debug:
+            msg: "{{ setup_docker_compose }}"
+    
+
+    - name: Run Certbot Docker Container
+      ansible.builtin.docker_container:
+        name: certbot
+        image: certbot/certbot
+        command: "renew"
+        volumes:
+          - "./nginx/certs:/etc/letsencrypt"
+          - "./nginx/conf:/etc/nginx/conf.d"
+        # Add a cron job or a scheduled task to renew certificates
+
+
+  
   roles:
     - role: ../roles/nextcloud_deploy_docker
