@@ -1,4 +1,4 @@
-instance_ip: "134.122.46.224"
+instance_ip: "159.203.14.97"
 
 dir_nextcloud: /var/www/nextcloud
 db_type: mysql
@@ -14,10 +14,20 @@ db_container_name: db_nc
 container_name: app_nc
 
 nc_url: "KanzDrive.ca"
+ip_nc: 134.122.46.224
+
 
 trusted_domains:
-  - "{{ nc_url }}"
-  - "localhost"
+  2: "{{ nc_url }}"
+  3: "localhost"
+  4: "{{ instance_ip }}:{{ port_app }}"
 
-ip_nc: 134.122.46.224
+
+theming_vars:
+  - { key: 'color', value: "#808000" }
+  - { key: 'name', value: "KanzDrive" }
+  - { key: 'url', value: "nc_url" }
+  - { key: 'slogan', value: "Your own secure and fast cloud storage service." }
+
+
 
