@@ -51,8 +51,10 @@
           - "./nginx/certs:/etc/letsencrypt"
           - "./nginx/conf:/etc/nginx/conf.d"
         # Add a cron job or a scheduled task to renew certificates
-
-
-  
-  roles:
-    - role: ../roles/nextcloud_deploy_docker
+    
+    - name: Include Nextcloud deploy docker role
+      include_role:
+        name: ../roles/nextcloud_deploy_docker
+    
+    
+- import_playbook: test_occ.yml

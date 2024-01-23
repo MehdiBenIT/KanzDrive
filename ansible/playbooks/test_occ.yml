@@ -58,6 +58,6 @@
       debug:
         msg: "{{ occ_command }}"
 
-    - name: add redis configuration
-      lineinfile:
+    # - name: add redis configuration
+    #   lineinfile:
       
