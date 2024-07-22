@@ -4,3 +4,22 @@ inventory
 test/*
 secrets/*
 .infracost/*
+*.log
+*.bak
+__pycache__/
+*.pyc
+
+#Docker specific
+docker-compose.override.yml
+.dockerignore
+**/Dockerfile
+
+#Ansible specific
+amsible/vars/*.yml
+secrets/secret.yml
+
+#Terraform specific
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/
+
