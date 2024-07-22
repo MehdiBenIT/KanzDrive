@@ -1,36 +1,74 @@
-version: '3'
-
-volumes:
-  db:
-  app:
+version: '3.1'
 
 services:
-  db:
-    image: mariadb
-    container_name: db_nc
-    restart: always
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
-    volumes:
-      - db:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=azerty123
-      - MYSQL_PASSWORD=azerty123
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-    
-  app:
+  nextcloud:
     image: nextcloud
-    restart: always
     container_name: app_nc
     ports:
-      - 8088:80
-    depends_on:
-      - db
+      - 8080:80
     volumes:
-      - app:/var/www/html
+      - nextcloud_data:/var/www/html
     environment:
-      - MYSQL_ROOT_PASSWORD=azerty123
-      - MYSQL_PASSWORD=azerty123
+      - MYSQL_HOST=db
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=azerty123
+    depends_on:
+     - db
+
+  bitwarden:
+    image: vaultwarden/server:latest
+    ports:
+      - 8081:80
+    environment:
+      - ADMIN_TOKEN=tnyvch
+    volumes:
+      - bitwarden_data:/data
+
+  db:
+    image: percona:latest
+    container_name: db_nc
+    restart: always
+    #command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextclouduser
+      - MYSQL_PASSWORD=securepassword
+    volumes:
+      - db_data:/var/lib/mysql
+
+  vscode:
+    image: codercom/code-server:latest
+    ports:
+      - 8082:8080
+    environment:
+      - PASSWORD=tnyvch
+    volumes:
+      - vscode_data:/home/coder/project
+
+  proxy:
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ../ansible/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ../ansible/nginx/certs:/etc/nginx/certs
+    depends_on:
+      - nextcloud
+      - bitwarden
+      - vscode
+
+  crowdsec:
+    image: crowdsecurity/crowdsec
+    volumes:
+      - ./crowdsec_config:/etc/crowdsec
+      - ./crowdsec_data:/var/lib/crowdsec/data
     
+
+volumes:
+  nextcloud_data:
+  bitwarden_data:
+  db_data:
+  vscode_data:
