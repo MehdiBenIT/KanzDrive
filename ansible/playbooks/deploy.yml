@@ -1,0 +1,28 @@
+---
+- name: Deploy Docker Containers
+  hosts: localhost
+  tasks:
+    - name: Ensure Docker is running
+      service:
+        name: docker
+        state: started
+
+    - name: Deploy Docker Compose
+      shell: docker-compose up -d
+      args:
+        chdir: /path/to/docker
+
+    - name: Copy Nginx configuration
+      copy:
+        src: /path/to/ansible/nginx/nginx.conf
+        dest: /path/to/docker/nginx.conf
+
+    - name: Copy CrowdSec configuration
+      copy:
+        src: /path/to/ansible/templates/crowdsec_config
+        dest: /path/to/docker/crowdsec_config
+
+    - name: Copy CrowdSec data
+      copy:
+        src: /path/to/ansible/templates/crowdsec_data
+        dest: /path/to/docker/crowdsec_data
