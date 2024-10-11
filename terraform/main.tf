@@ -3,36 +3,44 @@ provider "aws" {
   profile = "mehdi"
 }
 
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"] # Canonical
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+module "vpc" {
+  source = "terraform-aws-modules/vpc/aws"
+
+  name = "vpc-kanzdrive"
+  cidr = "10.0.0.0/16"
+
+  azs = ["us-east-1a"]
+  public_subnets = ["10.0.1.0/24"]
+
+}
+
 # Security Group
 resource "aws_security_group" "nc-sg" {
-  name        = "nc-sg"
   description = "Allow SSH, HTTP, HTTPS inbound traffic"
+  vpc_id = module.vpc.vpc_id
 
-  # SSH
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # HTTP
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # HTTPS
-  ingress {
-    description = "HTTPS"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+  name = join("_", ["sg", module.vpc.vpc_id])
+  dynamic "ingress" {
+    for_each = var.rules
+    content {
+      from_port   = ingress.value["port"]
+      to_port     = ingress.value["port"]
+      protocol    = ingress.value["proto"]
+      cidr_blocks = ingress.value["cidr_blocks"]
+    }
   }
 
   # Standard egress to allow all outbound traffic
@@ -42,11 +50,16 @@ resource "aws_security_group" "nc-sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "KanzDrive-SG"
+  }
 }
 
 # EC2 instance
 resource "aws_instance" "nc_instance" {
-  ami                         = "ami-053b0d53c279acc90"  # Update this with the AMI you want
+  ami                         = data.aws_ami.ubuntu  # Update this with the AMI you want
+  subnet_id                   = module.vpc.public_subnets[0] 
   instance_type               = "t2.micro"
   associate_public_ip_address = true   # Assign a public IP
   vpc_security_group_ids      = [aws_security_group.nc-sg.id]  # Attach the security group
