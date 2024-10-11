@@ -1,6 +1,26 @@
+
+#Docker specific
+docker-compose.override.yml
+.dockerignore
+**/Dockerfile
+
+#Ansible specific
+ansible/vars/*.yml
+secrets/secret.yml
+ansible/playbooks/old/
+
+#Terraform specific
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/
+
 inventory
 *.pem
 *.cfg
 test/*
 secrets/*
 .infracost/*
+*.log
+*.bak
+__pycache__/
+*.pyc

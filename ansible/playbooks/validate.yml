@@ -1,0 +1,95 @@
+- name: Validate Deployment
+  hosts: localhost
+  tasks:
+    - name: Wait for containers to be healthy
+      docker_container:
+        name: "{{ item }}"
+        state: started
+        healthcheck: true
+      loop:
+        - nextcloud
+        - bitwarden
+        - vscode
+        - db
+        - proxy
+        - crowdsec
+
+    - name: Check if Nextcloud is accessible
+      uri:
+        url: http://localhost/nextcloud
+        status_code: 200
+        method: GET
+      register: nextcloud_status
+
+    - name: Assert Nextcloud is accessible
+      assert:
+        that:
+          - nextcloud_status.status == 200
+        fail_msg: "Nextcloud is not accessible or returned an unexpected status code"
+
+    - name: Check if Bitwarden is accessible
+      uri:
+        url: http://localhost/bitwarden
+        status_code: 200
+        method: GET
+      register: bitwarden_status
+
+    - name: Assert Bitwarden is accessible
+      assert:
+        that:
+          - bitwarden_status.status == 200
+        fail_msg: "Bitwarden is not accessible or returned an unexpected status code"
+
+    - name: Check if VS Code is accessible
+      uri:
+        url: http://localhost/vscode
+        status_code: 200
+        method: GET
+      register: vscode_status
+
+    - name: Assert VS Code is accessible
+      assert:
+        that:
+          - vscode_status.status == 200
+        fail_msg: "VS Code is not accessible or returned an unexpected status code"
+
+    - name: Validate Nginx configuration syntax
+      command: nginx -t
+      register: nginx_test
+      changed_when: false
+      failed_when: nginx_test.rc != 0
+
+    - name: Check Docker container status
+      docker_container_info:
+        name: "{{ item }}"
+      loop:
+        - nextcloud
+        - bitwarden
+        - vscode
+        - db
+        - proxy
+        - crowdsec
+      register: container_info
+
+    - name: Validate Docker container status
+      assert:
+        that:
+          - item.State.Running is true
+        loop: "{{ container_info.results }}"
+        fail_msg: "One or more Docker containers are not running"
+
+    - name: Ensure Docker volumes are mounted
+      command: docker volume inspect {{ item }}
+      loop:
+        - nextcloud_data
+        - bitwarden_data
+        - db_data
+        - vscode_data
+      register: volume_inspect
+
+    - name: Validate Docker volumes
+      assert:
+        that:
+          - item.Mountpoint is defined
+        loop: "{{ volume_inspect.results }}"
+        fail_msg: "One or more Docker volumes are not correctly mounted"

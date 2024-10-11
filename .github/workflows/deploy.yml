@@ -1,0 +1,48 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Decode SSH Key
+      run: echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" | base64 --decode > /tmp/id_rsa
+
+    - name: Set SSH key permissions
+      run: chmod 600 /tmp/id_rsa
+
+    - name: Add SSH key to the agent
+      run: |
+        eval "$(ssh-agent -s)"
+        ssh-add /tmp/id_rsa
+
+    - name: Add remote server to known_hosts
+      run: ssh-keyscan -H ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Run Ansible Playbook
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.AWS_HOST }}
+        username: ${{ secrets.AWS_USER }}
+        key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+        script: |
+          cd /path/to/your/playbook
+          ansible-playbook deploy.yml
+
+    - name: Run Validation Playbook
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.AWS_HOST }}
+        username: ${{ secrets.AWS_USER }}
+        key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+        script: |
+          cd /path/to/your/playbook
+          ansible-playbook validate.yml

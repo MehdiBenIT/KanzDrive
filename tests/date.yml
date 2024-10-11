@@ -1,9 +1,0 @@
----
-- name: Provision an EC2 Instance
-  hosts: localhost
-  vars_files:
-    - aws_secret.yml
-  gather_facts: false
-  tasks:
-    - name: get date
-    
