@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+    }
+  }
+}
+
 provider "aws" {
   region  = "us-east-1"
   profile = "mehdi"
@@ -63,6 +71,7 @@ resource "aws_instance" "nc_instance" {
   instance_type               = "t2.micro"
   associate_public_ip_address = true   # Assign a public IP
   vpc_security_group_ids      = [aws_security_group.nc-sg.id]  # Attach the security group
+  user_data = fileexists("install.sh") ? file("script.sh") : null
 
   tags = {
     Name = "EC2_NC-${formatdate("YYYYMMDDHHmmaa", timestamp())}"
