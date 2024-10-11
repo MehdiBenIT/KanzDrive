@@ -13,6 +13,8 @@ ansible/playbooks/old/
 terraform.tfstate
 terraform.tfstate.backup
 .terraform/
+.terraform.lock
+.terraform.lock.hcl
 
 inventory
 *.pem

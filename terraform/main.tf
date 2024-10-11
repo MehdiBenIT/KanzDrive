@@ -1,10 +1,12 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = "~> 5.70.0"  # or another known stable version
     }
   }
 }
+
 
 provider "aws" {
   region  = "us-east-1"
@@ -66,7 +68,7 @@ resource "aws_security_group" "nc-sg" {
 
 # EC2 instance
 resource "aws_instance" "nc_instance" {
-  ami                         = data.aws_ami.ubuntu  # Update this with the AMI you want
+  ami                         = data.aws_ami.ubuntu.id  
   subnet_id                   = module.vpc.public_subnets[0] 
   instance_type               = "t2.micro"
   associate_public_ip_address = true   # Assign a public IP
