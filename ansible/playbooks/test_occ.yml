@@ -43,6 +43,9 @@
         - "integration_deepl"
         - "integration_notion"
         - "calendar"
+        - "forms"
+        - "spreed"
+        - "onlyoffice"
 
     - name: modify theming
       command: >

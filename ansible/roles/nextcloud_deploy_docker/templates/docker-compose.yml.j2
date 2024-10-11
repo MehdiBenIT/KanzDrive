@@ -44,9 +44,20 @@ services:
     volumes:
       - redis:/data
 
+  onlyoffice:
+    image: onlyoffice/documentserver
+    container_name: onlyoffice
+    ports:
+      - '6060:80'
+    volumes:
+      - document_data:/var/www/onlyoffice/Data
+      - document_log:/var/log/onlyoffice
+    restart: always
 
 volumes:
   db:
   nextcloud:
   redis:
+  document_data:
+  document_log:
 
